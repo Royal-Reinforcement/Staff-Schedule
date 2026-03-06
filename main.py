@@ -55,6 +55,7 @@ else:
     default_unit    = ldf['Unit_Code'].sort_values().unique().tolist().index(unit_code) if unit_code in ldf['Unit_Code'].values else None
 
     unit            = st.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=default_unit)
+    st.query_params['unit'] = unit
 
     df              = df[date]
     df              = df.dropna()
