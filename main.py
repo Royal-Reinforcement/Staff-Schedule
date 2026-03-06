@@ -56,12 +56,19 @@ else:
 
     default_unit    = ldf['Unit_Code'].sort_values().unique().tolist().index(st.session_state.unit) if st.session_state.unit in ldf['Unit_Code'].values else None
 
-    l, r = st.columns([4, 1],vertical_alignment='bottom')
+    if st.session_state.unit != None:
 
-    l.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=default_unit, key='unit')
-    st.query_params["unit"] = st.session_state.unit
+        l, r = st.columns([4, 1],vertical_alignment='bottom')
 
-    r.button('Clear Unit', on_click=lambda: st.session_state.update(unit=None), width='stretch')
+        l.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=default_unit, key='unit')
+        st.query_params["unit"] = st.session_state.unit
+
+        r.button('Clear Unit', on_click=lambda: st.session_state.update(unit=None), width='stretch')
+    
+    else:
+        
+        st.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=default_unit, key='unit')
+        st.query_params["unit"] = st.session_state.unit
 
     df              = df[date]
     df              = df.dropna()
