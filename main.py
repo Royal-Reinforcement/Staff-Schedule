@@ -29,6 +29,7 @@ def parse_date_in_column_headers(col):
         return col
     
 key  = st.query_params.get('auth')
+unit_code = st.query_params.get('unit')
 
 if key != st.secrets['auth']['key']:
 
@@ -50,7 +51,10 @@ else:
     cdf.columns     = ['Employee', 'Contact']
 
     date            = st.date_input('Date', pd.Timestamp.now().date())
-    unit            = st.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=None)
+
+    default_unit    = ldf['Unit_Code'].sort_values().unique().tolist().index(unit_code) if unit_code in ldf['Unit_Code'].values else None
+
+    unit            = st.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=default_unit)
 
     df              = df[date]
     df              = df.dropna()
