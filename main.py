@@ -29,7 +29,9 @@ def parse_date_in_column_headers(col):
         return col
     
 key  = st.query_params.get('auth')
-unit_code = st.query_params.get('unit')
+
+if "unit" not in st.session_state:
+    st.session_state.unit = st.query_params.get('unit', None)
 
 if key != st.secrets['auth']['key']:
 
@@ -52,10 +54,10 @@ else:
 
     date            = st.date_input('Date', pd.Timestamp.now().date())
 
-    default_unit    = ldf['Unit_Code'].sort_values().unique().tolist().index(unit_code) if unit_code in ldf['Unit_Code'].values else None
+    default_unit    = ldf['Unit_Code'].sort_values().unique().tolist().index(st.session_state.unit) if st.session_state.unit in ldf['Unit_Code'].values else None
 
-    unit            = st.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=default_unit)
-    st.query_params['unit'] = unit
+    st.selectbox('Looking for someone that knows about a specific unit?', options=ldf['Unit_Code'].sort_values().unique(), index=default_unit, key='unit')
+    st.query_params["unit"] = st.session_state.unit
 
     df              = df[date]
     df              = df.dropna()
@@ -90,9 +92,9 @@ else:
 
 
 
-    if unit != None:
+    if st.session_state.unit != None:
 
-        ldf_filtered    = ldf[ldf['Unit_Code'] == unit]
+        ldf_filtered    = ldf[ldf['Unit_Code'] == st.session_state.unit]
         employees       = pd.Series(ldf_filtered[['HL - Secondary', 'HL - Primary', 'OL - Primary', 'OL - Secondary']].values.ravel('K')).dropna().unique().tolist()
         df              = df[df.Employee.isin(employees)]
 
@@ -110,7 +112,7 @@ else:
 
     for department, df_department in df.groupby('Department'):
             
-            with st.expander(f'**{department}**', expanded=(unit != None)):
+            with st.expander(f'**{department}**', expanded=(st.session_state.unit != None)):
 
                 df_department = df_department.drop(columns=['Department']).set_index('Who')
                 st.dataframe(df_department, width='stretch')
